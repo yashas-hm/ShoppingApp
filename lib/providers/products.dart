@@ -11,7 +11,7 @@ class Products with ChangeNotifier {
 
   final String authToken;
 
-  Products(this.authToken);
+  Products(this.authToken, this._list);
 
   List<Product> _list = [
     Product(

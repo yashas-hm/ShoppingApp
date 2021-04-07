@@ -23,8 +23,8 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavourite() async {
-    final url = Uri.http(APIKey.databaseUrl,'$id.json');
+  Future<void> toggleFavourite(String authToken) async {
+    final url = Uri.http(APIKey.databaseUrl,'$id.json?auth=$authToken');
     isFavorite = !isFavorite;
     notifyListeners();
     try{

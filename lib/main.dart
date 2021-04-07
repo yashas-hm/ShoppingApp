@@ -27,19 +27,26 @@ class _ShopAppState extends State<ShopApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProxyProvider(
-          update: (BuildContext context, value, Products previous) => Products(),
+        ChangeNotifierProvider(
+          create: (ctx) => Auth(),
+        ),
+        ChangeNotifierProxyProvider<Auth, Products>(
+          update: (ctx, auth, previous) => Products(
+            auth.token,
+            previous.items == null ? [] : previous.items,
+          ),
           create: null,
         ),
         ChangeNotifierProvider(
           create: (ctx) => Cart(),
         ),
-        ChangeNotifierProvider(
-          create: (ctx) => Orders(),
+        ChangeNotifierProxyProvider<Auth, Orders>(
+          create: null,
+          update: (_, auth, previous) => Orders(
+            auth.token,
+            previous.orders == null ? [] : previous.orders,
+          ),
         ),
-        ChangeNotifierProvider(
-          create: (ctx) => Auth(),
-        )
       ],
       child: Consumer<Auth>(
         builder: (ctx, auth, _) => MaterialApp(
@@ -65,7 +72,7 @@ class _ShopAppState extends State<ShopApp> {
             ),
           ),
           debugShowCheckedModeBanner: false,
-          home:  auth.isAuth?ProductOverview():AuthScreen(),
+          home: auth.isAuth ? ProductOverview() : AuthScreen(),
           routes: {
             '/': (context) => ProductOverview(),
             ProductDetailsScreen.routeName: (context) => ProductDetailsScreen(),
