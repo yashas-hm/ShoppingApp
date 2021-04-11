@@ -1,7 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../model/HTTPException.dart';
 import '../providers/auth.dart';
 
@@ -42,8 +41,6 @@ class AuthScreen extends StatelessWidget {
                       margin: EdgeInsets.only(bottom: 20.0),
                       padding:
                           EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
-                      transform: Matrix4.rotationZ(-8 * pi / 180)
-                        ..translate(-10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.deepOrange.shade900,
@@ -123,23 +120,24 @@ class _AuthCardState extends State<AuthCard> {
           _authData['password'],
         );
       }
-    } on HTTPException catch(error) {
+    } on HTTPException catch (error) {
       var msg = 'Authentication Failed';
-      if(error.toString().contains('EMAIL_EXISTS')){
+      if (error.toString().contains('EMAIL_EXISTS')) {
         msg = 'Please login email exists';
-      }else if(error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')){
+      } else if (error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
         msg = 'Too many attempts try again later';
-      }else if(error.toString().contains('INVALID_PASSWORD')){
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
         msg = 'Invalid Password';
-      }else if(error.toString().contains('EMAIL_NOT_FOUND')){
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
         msg = 'Invalid Email. PLease sign up.';
-      }else if(error.toString().contains('WEAK_PASSWORD')){
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
         msg = 'Password too weak enter more than 6 characters';
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } catch(error){
+    } catch (error) {
       var message = 'Some error occurred. Try again';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     }
     setState(() {
       _isLoading = false;

@@ -2,16 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
 import '../api_key.dart';
 import '../model/HTTPException.dart';
-
 import 'product.dart';
 
 class Products with ChangeNotifier {
-
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._list);
+  Products(this.authToken, this.userId, this._list);
 
   List<Product> _list = [
     Product(
@@ -65,29 +65,34 @@ class Products with ChangeNotifier {
     return _list.firstWhere((element) => element.id == id);
   }
 
-  Future<void> updateProduct(String id, Product product) async{
+  Future<void> updateProduct(String id, Product product) async {
     final index = _list.indexWhere((element) => element.id == id);
     if (index >= 0) {
-      final url = Uri.http(APIKey.databaseUrl,'$id.json?auth=$authToken',);
-      await http.patch(url, body: json.encode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavourite': product.isFavorite,
-      }));
+      final url = Uri.http(
+        APIKey.databaseUrl,
+        'products/$id.json?auth=$authToken',
+      );
+      await http.patch(url,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+            'isFavourite': product.isFavorite,
+          }));
       notifyListeners();
     }
   }
 
-  Future<void> deleteProduct(String id) async{
-    final url = Uri.http(APIKey.databaseUrl,'$id.json?auth=$authToken');
-    final index = _list.indexWhere((element) => element.id==id);
+  Future<void> deleteProduct(String id) async {
+    final url =
+        Uri.http(APIKey.databaseUrl, 'products/$id.json?auth=$authToken');
+    final index = _list.indexWhere((element) => element.id == id);
     var product = _list[index];
     _list.removeAt(index);
     notifyListeners();
     final response = await http.delete(url);
-    if(response.statusCode>=400){
+    if (response.statusCode >= 400) {
       _list.insert(index, product);
       notifyListeners();
       throw HTTPException('Couldn\'t delete product');
@@ -96,25 +101,33 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSync() async {
-    final _url = Uri.http(
+    var url = Uri.http(
       APIKey.databaseUrl,
-      'products.json?auth=$authToken',);
+      'products.json?auth=$authToken&orderBy="creatorId"&equalTo="$userId"',
+    );
     try {
-      final result = await http.get(_url);
+      final result = await http.get(url);
       final extractedData = json.decode(result.body) as Map<String, dynamic>;
-      final loaded  = [];
-      if(extractedData==null){
+      final loaded = [];
+      if (extractedData == null) {
         return;
       }
+
+      url = Uri.http(
+          APIKey.databaseUrl, '/favourites/$userId.json?auth=$authToken');
+      final favResponse = await http.get(url);
+      final favourite = json.decode(favResponse.body);
       extractedData.forEach((id, data) {
-        loaded.insert(0, Product(
-          id: id,
-          title: data['title'],
-          description: data['description'],
-          price: data['price'],
-          imageUrl: data['imageUrl'],
-          isFavorite: data['isFavourite']
-        ));
+        loaded.insert(
+            0,
+            Product(
+              id: id,
+              title: data['title'],
+              description: data['description'],
+              price: data['price'],
+              imageUrl: data['imageUrl'],
+              isFavorite: favourite == null ? false : favourite[id] ?? false,
+            ));
       });
       _list = loaded;
       notifyListeners();
@@ -126,7 +139,8 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     final _url = Uri.http(
       APIKey.databaseUrl,
-      'products.json?auth=$authToken',);
+      'products.json?auth=$authToken',
+    );
     try {
       final response = await http.post(
         _url,
@@ -135,7 +149,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourite': product.isFavorite,
+          'creatorId': userId,
         }),
       );
 

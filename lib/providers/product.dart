@@ -23,14 +23,14 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavourite(String authToken) async {
-    final url = Uri.http(APIKey.databaseUrl,'$id.json?auth=$authToken');
+  Future<void> toggleFavourite(String authToken, String userId) async {
+    final url = Uri.http(APIKey.databaseUrl,'/favourites/$userId/$id.json?auth=$authToken');
     isFavorite = !isFavorite;
     notifyListeners();
     try{
-      final response = await http.patch(url,
+      final response = await http.put(url,
           body: json.encode({
-            'isFavourite': !isFavorite,
+            isFavorite,
           }));
       if(response.statusCode>=400){
         throw HTTPException('Could not mark');
