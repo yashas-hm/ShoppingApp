@@ -13,40 +13,7 @@ class Products with ChangeNotifier {
 
   Products(this.authToken, this.userId, this._list);
 
-  List<Product> _list = [
-    Product(
-      id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-      id: 'p4',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-  ];
+  List<Product> _list = [];
 
   List<Product> get items {
     return _showFavOnly
@@ -68,9 +35,9 @@ class Products with ChangeNotifier {
   Future<void> updateProduct(String id, Product product) async {
     final index = _list.indexWhere((element) => element.id == id);
     if (index >= 0) {
-      final url = Uri.http(
+      final url = Uri.https(
         APIKey.databaseUrl,
-        'products/$id.json?auth=$authToken',
+        '/products/$id.json', {"auth" : authToken},
       );
       await http.patch(url,
           body: json.encode({
@@ -86,7 +53,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url =
-        Uri.http(APIKey.databaseUrl, 'products/$id.json?auth=$authToken');
+        Uri.https(APIKey.databaseUrl, '/products/$id.json',{"auth" : authToken},);
     final index = _list.indexWhere((element) => element.id == id);
     var product = _list[index];
     _list.removeAt(index);
@@ -101,20 +68,21 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSync() async {
-    var url = Uri.http(
+    var url = Uri.https(
       APIKey.databaseUrl,
-      'products.json?auth=$authToken&orderBy="creatorId"&equalTo="$userId"',
+      '/products.json',
+      {"auth": authToken},
     );
     try {
       final result = await http.get(url);
+
       final extractedData = json.decode(result.body) as Map<String, dynamic>;
       final loaded = [];
       if (extractedData == null) {
         return;
       }
-
-      url = Uri.http(
-          APIKey.databaseUrl, '/favourites/$userId.json?auth=$authToken');
+      url = Uri.https(
+          APIKey.databaseUrl, '/favourites/$userId.json', {"auth": authToken});
       final favResponse = await http.get(url);
       final favourite = json.decode(favResponse.body);
       extractedData.forEach((id, data) {
@@ -132,14 +100,14 @@ class Products with ChangeNotifier {
       _list = loaded;
       notifyListeners();
     } catch (error) {
-      throw error;
+      print(error);
     }
   }
 
   Future<void> addProduct(Product product) async {
     final _url = Uri.http(
       APIKey.databaseUrl,
-      'products.json?auth=$authToken',
+      'products.json',{"auth" : authToken},
     );
     try {
       final response = await http.post(
@@ -163,6 +131,7 @@ class Products with ChangeNotifier {
       _list.add(productData);
       notifyListeners();
     } catch (error) {
+      print(error);
       throw error;
     }
   }

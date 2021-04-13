@@ -36,7 +36,7 @@ class Orders with ChangeNotifier {
   Future<void> addOrder(List<CartItem> items, double amount) async {
     final url = Uri.http(
         APIKey.databaseUrl,
-        'orders/$userId.json?auth=$authToken');
+        'orders/$userId.json', {"auth" : authToken},);
     final timeStamp = DateTime.now();
 
     final response = await http.post(url,
@@ -68,7 +68,7 @@ class Orders with ChangeNotifier {
   Future<void> fetchAndSync() async {
     final url = Uri.http(
         APIKey.databaseUrl,
-        'orders/$userId.json?auth=$authToken');
+        'orders/$userId.json', {"auth" : authToken},);
     final response = await http.get(url);
     final List<OrderItem> orderItems = [];
     final jsonData = json.decode(response.body) as Map<String, dynamic>;
