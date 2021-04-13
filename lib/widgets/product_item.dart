@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/auth.dart';
 import '../providers/cart.dart';
 import '../providers/product.dart';
 import '../screens/product_detail_screen.dart';
-import '../providers/auth.dart';
 
 class ProductItem extends StatelessWidget {
   @override
@@ -22,9 +22,17 @@ class ProductItem extends StatelessWidget {
             Navigator.of(context)
                 .pushNamed(ProductDetailsScreen.routeName, arguments: data.id);
           },
-          child: Image.network(
-            data.imageUrl,
-            fit: BoxFit.cover,
+          child: Hero(
+            tag: data.id,
+            child: FadeInImage(
+              placeholder: AssetImage(
+                'assets/images/product-placeholder.png',
+              ),
+              image: NetworkImage(
+                data.imageUrl,
+              ),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         footer: GridTileBar(

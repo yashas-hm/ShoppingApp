@@ -71,13 +71,15 @@ class Products with ChangeNotifier {
     var url = Uri.https(
       APIKey.databaseUrl,
       '/products.json',
-      {"auth": authToken},
+        {
+          "auth": authToken
+        },
     );
     try {
       final result = await http.get(url);
 
       final extractedData = json.decode(result.body) as Map<String, dynamic>;
-      final loaded = [];
+      final List<Product> loaded = [];
       if (extractedData == null) {
         return;
       }
