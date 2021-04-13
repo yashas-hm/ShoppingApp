@@ -7,7 +7,7 @@ A flutter app to demonstrate use of
 - ListViews
 - Authentication
 
-# Screenshots
+## Screenshots
 <p>
 <img src="https://github.com/yashas-hm/ShoppingApp/blob/master/images/9.jpg" width = 200/>
 <img src="https://github.com/yashas-hm/ShoppingApp/blob/master/images/10.jpg" width = 200/>
